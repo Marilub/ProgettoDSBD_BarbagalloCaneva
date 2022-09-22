@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="basic_style.css">
+    <link rel="stylesheet" href="login_signup.css">
+    <link href="https://fonts.googleapis.com/css?family=Courgette|Source+Sans+Pro:600&display=swap" rel="stylesheet">
+</head>
+<body>
+<main>
+    <div class="contenitore">
+        <div id="nome"> <h1 id="hospital_platform"> Hospital Platform </h1>  </div>
+
+        <form name="registrazione">
+            <div>
+                <label><input type="text" name="nome" placeholder="Nome"> </label>
+            </div>
+            <div>
+                <label><input type="text" name="cognome" placeholder="Cognome"> </label>
+            </div>
+            <div>
+                <label><input type="text" name="nomeUtente" id="nomeUtente" placeholder="Nome_utente"> </label>
+            </div>
+            <div>
+                <label><input type="password" name="psw"  placeholder="Password"></label><span class="hidden errorePsw"> Le password non coincidono</span>
+            </div>
+            <div>
+                <label><input type="password" name="confPsw" placeholder="Password"> </label>
+            </div>
+            <div>
+                <label><input type="radio" name="type" value="d" id="DocType">Doctor</label>
+            </div>
+            <div>
+                <label><input type="radio" name="type" value="r" id="RecType">Receptionist</label>
+            </div>
+            <div>
+                <input type="submit" name="submit" value="Registrati" id="submit">
+            </div>
+
+        </form>
+        </div>
+    <div class="hidden erroreCampi">Riempire tutti i campi del form!</div>
+    <div id="erroreNome" class="hidden">Nome Utente già utilizzato</div>
+    <div class="contenitore">
+        <p> Hai un account? <a href="http://127.0.0.1:80/login.html">Accedi</a> </p>
+    </div>
+
+</main>
+</body>
+<script>
+    function onText(text){
+        if(text === "Non presente"){
+            console.log("nome non inserito");
+            input = document.querySelector("#nomeUtente");
+            const error= document.querySelector("#erroreNome");
+            error.classList.add("hidden");
+            input.classList.remove("erroreUser");
+        }
+        else{
+            input = document.querySelector("#nomeUtente");
+            const error= document.querySelector("#erroreNome");
+            error.classList.remove("hidden");
+            input.classList.add("erroreUser");
+        }
+    }
+    function onResponse(response){
+        return response.text();
+    }
+    function verifica(){
+        let headers = new Headers();
+        headers.append('Access-Control-Allow-Origin', "*");
+        fetch("http://127.0.0.1:8080/registration/verificaUsername/"+form.nomeUtente.value,{mode:'cors',headers:headers}).then(onResponse).then(onText);
+    }
+    function invio(event){
+        if(form.nome.value.length == 0 || form.cognome.value.length == 0 || form.nomeUtente.value.length == 0 ||
+            form.psw.value.length == 0 || form.confPsw.value.length == 0 || form.type.value.length==0){
+            const error= document.querySelector(".erroreCampi");
+            error.classList.remove("hidden");
+            console.log("un campo è vuoto");
+            event.preventDefault();
+        }
+        else if(form.psw.value !== form.confPsw.value){
+            console.log("password errate");
+            const error = document.querySelector(".errorePsw");
+            error.classList.remove("hidden");
+            const error2= document.querySelector(".erroreCampi");
+            error2.classList.add("hidden");
+            event.preventDefault();
+        }else{
+            console.log("else");
+            const error = document.querySelector(".errorePsw");
+            error.classList.add("hidden");
+            const error2= document.querySelector(".erroreCampi");
+            error2.classList.add("hidden");
+            event.preventDefault();
+            let sendForm={
+                name: form.nome.value,
+                surname: form.cognome.value,
+                username: form.nomeUtente.value,
+                pass: form.psw.value,
+                type: form.type.value
+            }
+
+            $.ajax({
+                type:"POST",
+                url: "http://127.0.0.1:8080/registration/",
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function (dataR) {
+                    console.log("ajax successo");
+                    if(dataR.type==="d") location.replace("http://127.0.0.1:80/doctor.html");
+                    else location.replace("http://127.0.0.1:80/receptionist.html");
+                },
+                data: JSON.stringify(sendForm)
+            });
+        }
+
+    }
+    const form = document.forms['registrazione'];
+    form.addEventListener('submit',invio);
+    let nome=true;
+    form.nomeUtente.addEventListener("blur",verifica);
+</script>
+</html>
+
+
+

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="basic_style.css">
+    <link rel="stylesheet" href="login_signup.css">
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Courgette|Source+Sans+Pro:600&display=swap" rel="stylesheet">
+</head>
+<body>
+<main>
+    <div class="contenitore">
+        <div id="nome">
+            <h1 id="hospital_platform">Hospital Platform</h1>
+        </div>
+        <form name="login">
+            <div>
+                <label><input type="text" name="nomeUtente" placeholder="Nome utente"> </label>
+            </div>
+            <div>
+                <label><input type="password" name="psw" placeholder="Password"> </label>
+            </div>
+            <div>
+                <input type="submit" name="submit" value="Login" id="submit">
+            </div>
+        </form>
+    </div>
+    <div class="hidden erroreCampi">Riempire tutti i campi del form!</div>
+    <div class="hidden erroreCredenziali">Credenziali errate</div>
+
+    <div class="contenitore">
+        <p>Non hai un account? <a href="http://127.0.0.1/">Iscriviti</a></p>
+    </div>
+</main>
+</body>
+<script>
+    function invio(event){
+        event.preventDefault();
+        if(form.nomeUtente.value.length==0 || form.psw.value.length==0){
+            const error= document.querySelector(".erroreCampi");
+            error.classList.remove("hidden");
+            console.log("un campo è vuoto");
+            document.querySelector(".erroreCredenziali").classList.add("hidden");
+        } else {
+            const error= document.querySelector(".erroreCampi");
+            error.classList.add("hidden");
+
+
+            var url = "http://127.0.0.1:8080/login/access/"+form.nomeUtente.value+"/"+form.psw.value;
+            $.ajax({
+                type:"GET",
+                url: url,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                success: function (dataR) {
+                    console.log("ajax successo");
+                    if(dataR.type==="d") location.replace("http://127.0.0.1:80/doctor.html");
+                    else location.replace("http://127.0.0.1:80/receptionist.html");
+                },
+                error: function (err){
+                    const error= document.querySelector(".erroreCredenziali");
+                    error.classList.remove("hidden");
+                }
+            });
+        }
+    }
+
+    const form = document.forms['login'];
+    form.addEventListener('submit',invio);
+</script>
+</html>

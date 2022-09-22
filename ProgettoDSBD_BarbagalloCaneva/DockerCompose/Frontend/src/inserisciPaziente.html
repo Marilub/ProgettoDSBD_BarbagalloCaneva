@@ -1,0 +1,124 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="inserisciPaziente.css">
+    <title>Insert Patient Menu</title>
+</head>
+<body>
+
+<main>
+
+    <form id="form"  name="form">
+        <div class="txt"> Inserisci Paziente: </div>
+        <label > Nome  <input type='text' name='nome' >        </label>
+        <label > Cognome  <input type='text' name='cognome' >  </label>
+        <label>  Età  <input type='text' name='eta' >          </label>
+        <label>  Data di nascita <input type='text' name='dataNascita' >   </label>
+        <label > Luogo di nascita <input type='text' name='luogoNascita' > </label>
+        <label > Email <input type='text' name='email' > </label>
+        <label> Genere:
+            <div class="gender">
+                    <input type="radio" id="maschio" name="genere" value="m">
+                    <label for="maschio">Maschio</label><br>
+                    <input type="radio" id="femmina" name="genere" value="f" >
+                    <label for="femmina">Femmina</label><br>
+            </div>
+        </label>
+
+        <label>Dottore:
+            <div class="listaDottori">
+                <select name="doc" id="doc">
+                </select>
+            </div>
+        </label>
+
+        <label>&nbsp;<input type='submit'></label>
+
+        </div>
+    </form>
+
+    <div class="hidden erroreCampi">Riempire tutti i campi del form!</div>
+</main>
+</body>
+
+<script>
+    function invio(event){
+        if(form.nome.value.length == 0 || form.cognome.value.length == 0 || form.eta.value.length == 0 ||
+            form.dataNascita.value.length == 0 || form.luogoNascita.value.length == 0 || form.genere.value.length==0 || form.email.value.length==0){
+            const error= document.querySelector(".erroreCampi");
+            error.classList.remove("hidden");
+            console.log("un campo è vuoto");
+            event.preventDefault();
+        }else{
+            console.log("else");
+            const error= document.querySelector(".erroreCampi");
+            error.classList.add("hidden");
+            event.preventDefault();
+            let sendForm={
+                nome: form.nome.value,
+                cognome: form.cognome.value,
+                eta: form.eta.value,
+                dataNascita: form.dataNascita.value,
+                luogoNascita: form.luogoNascita.value,
+                genere: form.genere.value,
+                email: form.email.value
+            }
+
+            $.ajax({
+                type:"POST",
+                url: "http://127.0.0.1:8080/reception/insertPaziente/"+select.value,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function () {
+                    console.log("ajax successo");
+                    form.classList.add("hidden");
+                    const main = document.querySelector("main");
+                    let scritta= document.createElement("h1");
+                    scritta.textContent="Paziente inserito!";
+                    scritta.classList.add("txt");
+                    main.appendChild(scritta);
+                    setTimeout(() => {  location.replace("http://127.0.0.1:80/receptionist.html"); }, 3000);
+
+
+                },
+                data: JSON.stringify(sendForm)
+            });
+        }
+    }
+
+
+
+    $(document).ready(function() {
+        $.ajax({
+            type:"GET",
+            url: "http://127.0.0.1:8080/reception/listaMedici",
+            dataType: "json",
+            crossDomain: true,
+            headers: {'Access-Control-Allow-Origin':"*"},
+            contentType: "application/json",
+            success: function (medici) {
+
+                for(doc in medici){
+                    console.log("medici: "+medici[doc]["nome"]);
+
+                    let nome= medici[doc]["nome"]+" "+medici[doc]["cognome"];
+                    console.log("nome "+nome);
+                    let id= medici[doc]["idMedico"];
+                    console.log("idmedico "+id);
+                    let newOption=new Option(nome,id);
+                    select.add(newOption,undefined);
+                }
+            }
+        });
+
+    });
+
+    const select= document.querySelector("#doc");
+
+    const form = document.forms['form'];
+    form.addEventListener('submit',invio);
+</script>
+</html>

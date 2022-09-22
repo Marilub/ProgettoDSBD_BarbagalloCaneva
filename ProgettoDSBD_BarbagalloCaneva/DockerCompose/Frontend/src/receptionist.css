@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    background-color: whitesmoke;
+}
+#username{
+    text-align:center;
+}
+#contenitore {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    background-color: whitesmoke;
+    font-family: Helvetica, sans-serif;
+    height: 200px;
+}
+#logout{
+    height: 25px;
+    margin:5px;
+}
