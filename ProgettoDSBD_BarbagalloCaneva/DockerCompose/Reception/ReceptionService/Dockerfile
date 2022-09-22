@@ -3,7 +3,7 @@ WORKDIR /project
 COPY . .
 RUN mvn package
 
-FROM java:8-alpine
+FROM openjdk:8-alpine
 WORKDIR /app
 COPY --from=builder /project/target/ReceptionService-0.0.1-SNAPSHOT.jar ./receptionservice.jar
 ENTRYPOINT ["/bin/sh","-c"]
