@@ -1,0 +1,161 @@
+version: '3'
+services:
+ eurekaserver:
+  build:
+   context: ./ServerEureka/eurekaServer
+   dockerfile: Dockerfile
+  ports:
+   - 8761:8761
+  restart: always
+
+ reglogdb:
+  image: mysql:5.6
+  environment:
+   MYSQL_DATABASE: userDB
+   MYSQL_USER: gianmari
+   MYSQL_PASSWORD: ourPass
+   MYSQL_ROOT_PASSWORD: pass
+  volumes:
+   - ./db_data:/var/lib/mysql
+  restart: always
+
+ docdb:
+  image: mysql:5.6
+  environment:
+   MYSQL_DATABASE: DoctorDB
+   MYSQL_USER: gianmari
+   MYSQL_PASSWORD: ourPass
+   MYSQL_ROOT_PASSWORD: pass
+  volumes:
+   - ./db_DocData:/var/lib/mysql
+  restart: always
+
+ receptiondb:
+  image: mysql:5.6
+  environment:
+   MYSQL_DATABASE: ReceptionDB
+   MYSQL_USER: gianmari
+   MYSQL_PASSWORD: ourPass
+   MYSQL_ROOT_PASSWORD: pass
+  volumes:
+   - ./db_ReceptionData:/var/lib/mysql
+  restart: always
+
+ zookeeper:
+  image: docker.io/bitnami/zookeeper:3.8
+  ports:
+   - 2181:2181
+  volumes:
+   - "zookeeper_data:/bitnami"
+  environment:
+   - ALLOW_ANONYMOUS_LOGIN=yes
+
+ kafka:
+  image: docker.io/bitnami/kafka:3.2
+  #ports:
+  #- 9092:9092
+  volumes:
+   - "kafka_data:/bitnami"
+  environment:
+   KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+   ALLOW_PLAINTEXT_LISTENER: "yes"
+   KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+   KAFKA_LISTENERS: PLAINTEXT://:9092
+  depends_on:
+   - zookeeper
+
+ reglog:
+  build:
+   context: ./RegLogIn/RegLogService/
+   dockerfile: Dockerfile
+  ports:
+   - 8081:8081
+  environment:
+   MYSQL_DATABASE: userDB
+   MYSQL_USER: gianmari
+   MYSQL_PASSWORD: ourPass
+   MYSQL_ROOT_PASSWORD: pass
+   MYSQL_HOST: reglogdb
+   http.cors.allow-origin: "*"
+   http.cors.enable: "true"
+   http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+   KAFKA_ADDRESS: kafka:9092
+   KAFKA_GROUP_ID: ReglogGroup
+   KAFKA_MAIN_TOPIC: session-topic
+   EUREKA_SERVER: eurekaserver
+  restart: always
+  
+ frontend:
+  build:
+   context: ./Frontend
+   dockerfile: Dockerfile
+  ports: 
+   - 80:80
+  restart: always
+
+ docservice:
+  build:
+   context: ./Doc/DoctorService/
+   dockerfile: Dockerfile
+  ports:
+   - 8082:8082
+  environment:
+   MYSQL_DATABASE: DoctorDB
+   MYSQL_USER: gianmari
+   MYSQL_PASSWORD: ourPass
+   MYSQL_ROOT_PASSWORD: pass
+   MYSQL_HOST:  docdb
+   http.cors.allow-origin: "*"
+   http.cors.enable: "true"
+   http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+   KAFKA_ADDRESS: kafka:9092
+   KAFKA_GROUP_ID: docGroup
+   KAFKA_MAIN_TOPIC: session-topic
+   KAFKA_PAZIENTE_TOPIC: p-topic
+   KAFKA_DOCTOR_TOPIC: d-topic
+   EUREKA_SERVER: eurekaserver
+  restart: always
+
+ receptionservice:
+  build:
+   context: ./Reception/ReceptionService/
+   dockerfile: Dockerfile
+  ports:
+   - 8083:8083
+  environment:
+   MYSQL_DATABASE: ReceptionDB
+   MYSQL_USER: gianmari
+   MYSQL_PASSWORD: ourPass
+   MYSQL_ROOT_PASSWORD: pass
+   MYSQL_HOST: receptiondb
+   http.cors.allow-origin: "*"
+   http.cors.enable: "true"
+   http.cors.allow-methods: OPTIONS,HEAD,GET,POST,PUT,DELETE
+   KAFKA_ADDRESS: kafka:9092
+   KAFKA_GROUP_ID: receptionGroup
+   KAFKA_MAIN_TOPIC: session-topic
+   KAFKA_PAZIENTE_TOPIC: p-topic
+   KAFKA_DOCTOR_TOPIC: d-topic
+   EUREKA_SERVER: eurekaserver
+  restart: always
+
+ apigateway:
+  build:
+   context: ./ApiGateway/GatewayAPI
+   dockerfile: Dockerfile
+  ports:
+   - 8080:8080
+  environment:
+   EUREKA_SERVER: eurekaserver
+   REGLOG_SERVICE: reglog
+   RECEPTION_SERVICE: receptionservice
+   DOCTOR_SERVICE: docservice
+  restart: always
+
+volumes:
+ zookeeper_data:
+  driver: local
+ kafka_data:
+  driver: local
+
+
