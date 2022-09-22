@@ -1,0 +1,466 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Doctor Home</title>
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="StyleDoctor.css">
+
+</head>
+<body>
+
+<main>
+    <button id="logout"> Logout </button>
+    <form id="form1" name="formcerca">
+        <h1 id="username"></h1>
+        <div id="txt"> Cerca Paziente: </div>
+        <label > Nome  <input type='text' name='nome' >       </label>
+        <label > Cognome  <input type='text' name='cognome' >  </label>
+        <label >&nbsp;<input type='submit' value="Cerca"></label>
+        </div>
+    </form>
+    <div class="hidden erroreCampi">Riempire tutti i campi del form!</div>
+
+    <div class="hidden" id="containerSelectP">
+    <div id="cercaPazienti">
+        <button class="backB" id="backCerca"> &larr; Indietro </button>
+        <div class="pazienti" id="containerPazienti">
+        <div>Pazienti trovati: </div>
+        <br>
+        </div>
+    </div>
+    </div>
+    <div class="hidden" id="DoctorPatient">
+
+        <div class="contenitore">
+            <button class="backB" id="backCartella"> &larr; Indietro </button>
+            <div class="Cartella">
+                <div > Nome: <span id="nome">     </span>  </div>
+                <div > Cognome: <span id="cognome">     </span>  </div>
+                <div > Età: <span id="eta">     </span>  </div>
+                <div > Genere: <span id="genere">     </span>  </div>
+                <div > Diagnosi: <span id="diagnosi">     </span>  </div>
+                <div > Cura: <span id="cura">     </span>  </div>
+                <div > Stato: <span id="ricovero">     </span>  </div>
+            </div>
+
+            <div class="menu">
+                <button type="button" id="AggiungiDiagnosi">Aggiungi Diagnosi</button>
+                <button type="button" id="ModificaDiagnosi" class="hidden">Modifica Diagnosi</button>
+                <button type="button" id="RimuoviDiagnosi" class="hidden">Rimuovi Diagnosi</button>
+
+                <button type="button" id="AggiungiCura" class="hidden">Aggiungi Cura</button>
+                <button type="button" id="ModificaCura" class="hidden">Modifica Cura</button>
+                <button type="button" id="RimuoviCura" class="hidden">Rimuovi Cura</button>
+
+                <button type="button" id="Ricovera">Ricovera</button>
+                <button type="button" id="Dimetti">Dimetti</button>
+            </div>
+
+
+        </div>
+        <div class="hidden" id="errPostiLetto"> Posti letto Insufficienti</div>
+        <div class="hidden" id="errRicovero"> Paziente già esistente oppure già in ricovero</div>
+
+    </div>
+
+    <div  class="hidden" id="Insert" >
+    <div  class="pazienti" >
+        <p id="nomePaziente"> </p>
+        <div id="tipoInserimento"> </div>
+        <form name="formInsert">
+            <label> <textarea rows="4" cols="50"> </textarea> </label>
+            <label> &nbsp;<input type='submit' value="Inserisci"></label>
+        </form>
+    </div>
+    </div>
+
+</main>
+</body>
+
+<script>
+    function BackFunction(type){
+        const listaPazienti=document.querySelector('#containerSelectP');
+
+        const containerPazienti=document.querySelector('#containerPazienti');
+        containerPazienti.textContent="";
+        const intro= document.createElement("div");
+        intro.textContent="Pazienti trovati: ";
+        containerPazienti.appendChild(intro);
+
+        formCerca.nome.value=" ";
+        formCerca.cognome.value=" ";
+
+
+
+        if(type==="Cerca"){
+            listaPazienti.classList.add("hidden");
+        }
+        else if (type==="Cartella"){
+            const docPatient= document.querySelector("#DoctorPatient");
+            docPatient.classList.add("hidden");
+
+           document.querySelector('#diagnosi').textContent="";
+           document.querySelector('#cura').textContent="";
+
+            bEditD.classList.add("hidden");
+            bDelD.classList.add("hidden");
+            bAddC.classList.add("hidden");
+            bEditC.classList.add("hidden");
+            bDelC.classList.add("hidden");
+
+            bAddD.classList.remove("hidden");
+
+
+
+           console.log("lunghezza daignosi: "+document.querySelector('#diagnosi').textContent.length);
+        }
+
+        formCerca.classList.remove("hidden");
+    }
+
+    function Rimuovi(type){
+        const cartellaPaziente=document.querySelector('.Cartella');
+        if(type==="Diagnosi"){
+            $.ajax({
+                type:"DELETE",
+                url: "http://hospital.loc/doctor/deleteDiagnosis/"+IdPazienteScelto,
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                success: function () {
+                    cartellaPaziente.querySelector("#diagnosi").textContent=" ";
+                    cartellaPaziente.querySelector("#cura").textContent=" ";
+                    bEditD.classList.add("hidden");
+
+                    bDelD.classList.add("hidden");
+                    bAddC.classList.add("hidden");
+                    bEditC.classList.add("hidden");
+                    bDelC.classList.add("hidden");
+
+                    bAddD.classList.remove("hidden");
+                }
+            });
+        }else if (type==="Cura"){
+            $.ajax({
+                type:"DELETE",
+                url: "http://hospital.loc/doctor/deleteCure/"+IdPazienteScelto,
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                success: function () {
+                    cartellaPaziente.querySelector("#cura").textContent=" ";
+                    bAddC.classList.remove("hidden");
+                    bEditC.classList.add("hidden");
+                    bDelC.classList.add("hidden");
+                }
+            });
+        }
+
+    }
+
+    function Dimetti(){
+
+        const cartellaPaziente=document.querySelector('.Cartella');
+
+        const errorTxt= document.querySelector("#errPostiLetto");
+        const errorTxt2= document.querySelector("#errRicovero");
+        $.ajax({
+            type:"PUT",
+            url: "http://hospital.loc/doctor/dimetti/"+IdPazienteScelto,
+            dataType: "json",
+            crossDomain: true,
+            headers: {'Access-Control-Allow-Origin':"*"},
+            contentType: "application/json",
+            success: function (paziente) {
+                errorTxt.classList.add("hidden");
+                errorTxt2.classList.add("hidden");
+                cartellaPaziente.querySelector("#ricovero").textContent="Non Ricoverato";
+                bDimetti.classList.add("hidden");
+                bRicovera.classList.remove("hidden");
+            }
+
+        });
+
+    }
+
+    function Ricovera(){
+        const errorTxt= document.querySelector("#errPostiLetto");
+        const errorTxt2= document.querySelector("#errRicovero");
+        const cartellaPaziente=document.querySelector('.Cartella');
+        $.ajax({
+            type:"PUT",
+            url: "http://hospital.loc/doctor/ricovera/"+IdPazienteScelto,
+            dataType: "json",
+            crossDomain: true,
+            headers: {'Access-Control-Allow-Origin':"*"},
+            contentType: "application/json",
+            success: function (paziente) {
+                errorTxt.classList.add("hidden");
+                cartellaPaziente.querySelector("#ricovero").textContent="Ricoverato";
+                bRicovera.classList.add("hidden");
+                bDimetti.classList.remove("hidden");
+            },
+            statusCode:{400: function(){
+                cartellaPaziente.querySelector("#ricovero").textContent="Non Ricoverato";
+
+                errorTxt.classList.remove("hidden");
+            },
+                404: function(){
+                errorTxt2.classList.remove("hidden");
+            }
+            }
+
+
+        });
+
+    }
+    function InserisciAction(event){
+       const docPatient= document.querySelector("#DoctorPatient");
+        const cartellaPaziente=document.querySelector('.Cartella');
+        const typeInserimento=document.querySelector("#tipoInserimento").textContent;
+        let textToInsert=document.querySelector("textarea").value;
+        event.preventDefault();
+        if(typeInserimento==="Inserisci Diagnosi"){
+            $.ajax({
+                type:"POST",
+                url: "http://hospital.loc/doctor/insertDiagnosis/"+IdPazienteScelto,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function (paziente) {
+                    cartellaPaziente.querySelector("#diagnosi").textContent=paziente["diagnosi"];
+                    const Insert=document.querySelector("#Insert");
+                        Insert.classList.add("hidden");
+                         textToInsert="";
+
+
+                    docPatient.classList.remove("hidden");
+
+                    bEditD.classList.remove("hidden");
+                    bDelD.classList.remove("hidden");
+                    bAddC.classList.remove("hidden");
+
+                    bAddD.classList.add("hidden");
+                },
+                data: textToInsert
+            });
+
+        }else if(typeInserimento==="Modifica Diagnosi"){
+            $.ajax({
+                type:"PUT",
+                url: "http://hospital.loc/doctor/editDiagnosis/"+IdPazienteScelto,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function (paziente) {
+                    cartellaPaziente.querySelector("#diagnosi").textContent=paziente["diagnosi"];
+                    const Insert=document.querySelector("#Insert");
+                    Insert.classList.add("hidden");
+                    textToInsert="";
+                    docPatient.classList.remove("hidden");
+                },
+                data: textToInsert
+            });
+        } else if(typeInserimento==="Inserisci Cura"){
+            $.ajax({
+                type:"POST",
+                url: "http://hospital.loc/doctor/insertCure/"+IdPazienteScelto,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function (paziente) {
+                    cartellaPaziente.querySelector("#cura").textContent=paziente["cura"];
+                    const Insert=document.querySelector("#Insert");
+                    Insert.classList.add("hidden");
+                    textToInsert="";
+                    docPatient.classList.remove("hidden");
+
+                    bEditC.classList.remove("hidden");
+                    bDelC.classList.remove("hidden");
+
+                    bAddC.classList.add("hidden");
+                },
+                data: textToInsert
+            });
+        }else if(typeInserimento==="Modifica Cura"){
+            $.ajax({
+                type:"PUT",
+                url: "http://hospital.loc/doctor/editCure/"+IdPazienteScelto,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function (paziente) {
+                    cartellaPaziente.querySelector("#cura").textContent=paziente["cura"];
+                    const Insert=document.querySelector("#Insert");
+                    Insert.classList.add("hidden");
+                    textToInsert="";
+                    docPatient.classList.remove("hidden");
+                },
+                data: textToInsert
+            });
+        }
+    }
+
+    function ActionOnPatient(action){
+        document.querySelector("#DoctorPatient").classList.add("hidden");
+
+        if(action==="AggiungiDiagnosi"){
+            document.querySelector("#tipoInserimento").textContent="Inserisci Diagnosi";
+            document.querySelector("#Insert").classList.remove("hidden");
+        } else if (action==="ModificaDiagnosi"){
+            document.querySelector("#tipoInserimento").textContent="Modifica Diagnosi";
+            document.querySelector("#Insert").classList.remove("hidden");
+        } else if(action==="AggiungiCura"){
+            document.querySelector("#tipoInserimento").textContent="Inserisci Cura";
+            document.querySelector("#Insert").classList.remove("hidden");
+        } else if (action==="ModificaCura"){
+            document.querySelector("#tipoInserimento").textContent="Modifica Cura";
+            document.querySelector("#Insert").classList.remove("hidden");
+        }
+    }
+
+    function OnLogout(){
+        location.replace("http://hospital.loc/index.html");
+    }
+    function cercaPaziente(paziente){
+        const listaPazienti=document.querySelector('#containerSelectP');
+        listaPazienti.classList.add("hidden");
+
+        const docPatient=document.querySelector('#DoctorPatient');
+
+        const cartellaPaziente=document.querySelector('.Cartella');
+
+        cartellaPaziente.querySelector("#nome").textContent=paziente["nome"];
+        cartellaPaziente.querySelector("#cognome").textContent=paziente["cognome"];
+        cartellaPaziente.querySelector("#eta").textContent=paziente["eta"];
+        cartellaPaziente.querySelector("#genere").textContent=paziente["genere"];
+        let diagnosi=paziente["diagnosi"];
+        cartellaPaziente.querySelector("#diagnosi").textContent=diagnosi;
+        let cura= paziente["cura"];
+        cartellaPaziente.querySelector("#cura").textContent=cura;
+        if(diagnosi!==null && cartellaPaziente.querySelector("#diagnosi").textContent.length!==0 ){
+            bEditD.classList.remove("hidden");
+            bDelD.classList.remove("hidden");
+            bAddC.classList.remove("hidden");
+
+            bAddD.classList.add("hidden");
+
+        }
+        if(cura!==null && cartellaPaziente.querySelector("#cura").textContent.length!==0 ) {
+            bEditC.classList.remove("hidden");
+            bDelC.classList.remove("hidden");
+
+            bAddC.classList.add("hidden");
+        }
+
+        if(paziente["ricovero"]===true){
+            cartellaPaziente.querySelector("#ricovero").textContent="Ricoverato";
+            bRicovera.classList.add("hidden");
+            bDimetti.classList.remove("hidden");
+        }
+        else {
+            cartellaPaziente.querySelector("#ricovero").textContent = "Non Ricoverato";
+            bDimetti.classList.add("hidden");
+            bRicovera.classList.remove("hidden");
+
+        }
+
+        docPatient.classList.remove("hidden");
+        document.querySelector("#nomePaziente").textContent= paziente["nome"]+ " "+paziente["cognome"];
+        IdPazienteScelto=paziente["idPaziente"];
+
+        console.log(paziente);
+    }
+
+    function cerca(event){
+
+        if(formCerca.nome.value.length == 0 || formCerca.cognome.value.length == 0 ){
+            const error= document.querySelector(".erroreCampi");
+            error.classList.remove("hidden");
+            console.log("un campo è vuoto");
+            event.preventDefault();
+        }else{
+
+            const error= document.querySelector(".erroreCampi");
+            error.classList.add("hidden");
+            formCerca.classList.add("hidden");
+            const listaPazienti=document.querySelector('#containerSelectP');
+            listaPazienti.classList.remove("hidden");
+            event.preventDefault();
+
+            $.ajax({
+                type:"GET",
+                url: "http://hospital.loc/doctor/search/"+formCerca.nome.value+"/"+formCerca.cognome.value,
+                dataType: "json",
+                crossDomain: true,
+                headers: {'Access-Control-Allow-Origin':"*"},
+                contentType: "application/json",
+                success: function (pazienti) {
+
+                    for(p in pazienti){
+                        console.log("idPaziente: "+pazienti[p]["idPaziente"]);
+                        let paz=pazienti[p];
+                        let nome= pazienti[p]["nome"]+" "+pazienti[p]["cognome"];
+
+                        console.log("nome cognome: "+nome);
+                       const containerPazienti=document.querySelector('#containerPazienti');
+                       const newButton= document.createElement("button");
+                       newButton.textContent=nome;
+
+                       newButton.addEventListener('click',function(){cercaPaziente(paz)});
+
+                       containerPazienti.appendChild(newButton);
+
+                    }
+                }
+            });
+        }
+    }
+    let IdPazienteScelto;
+    const formCerca = document.forms['formcerca'];
+    formCerca.addEventListener('submit',cerca);
+
+    const logout=document.querySelector("#logout");
+    logout.addEventListener('click',OnLogout);
+
+    const bAddD=document.querySelector('#AggiungiDiagnosi');
+    bAddD.addEventListener('click', function(){ActionOnPatient("AggiungiDiagnosi")});
+
+    const bEditD=document.querySelector('#ModificaDiagnosi');
+    bEditD.addEventListener('click', function(){ActionOnPatient("ModificaDiagnosi")});
+
+    const bDelD=document.querySelector('#RimuoviDiagnosi');
+    bDelD.addEventListener('click', function(){Rimuovi("Diagnosi")});
+
+    const bAddC=document.querySelector('#AggiungiCura');
+    bAddC.addEventListener('click', function(){ActionOnPatient("AggiungiCura")});
+
+    const bEditC=document.querySelector('#ModificaCura');
+    bEditC.addEventListener('click', function(){ActionOnPatient("ModificaCura")});
+
+    const bDelC=document.querySelector('#RimuoviCura');
+    bDelC.addEventListener('click', function(){Rimuovi("Cura")});
+
+    const formInsert = document.forms['formInsert'];
+    formInsert.addEventListener('submit',InserisciAction);
+
+    const bRicovera=document.querySelector('#Ricovera');
+    bRicovera.addEventListener('click',Ricovera);
+
+    const bDimetti=document.querySelector('#Dimetti');
+    bDimetti.addEventListener('click',Dimetti);
+
+    const backCerca=document.querySelector('#backCerca');
+    backCerca.addEventListener('click',function(){BackFunction("Cerca")});
+
+    const backCartella=document.querySelector('#backCartella');
+    backCartella.addEventListener('click',function(){BackFunction("Cartella")});
+
+
+
+</script>
+</html>

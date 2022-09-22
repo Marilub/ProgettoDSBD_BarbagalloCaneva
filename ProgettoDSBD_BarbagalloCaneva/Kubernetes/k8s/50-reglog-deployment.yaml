@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reglog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reglog
+  template:
+    metadata:
+      labels:
+        app: reglog
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "reglog/actuator/prometheus"
+    spec:
+      containers:
+      - env:
+        - name: KAFKA_ADDRESS
+          value: kafka:9092
+        - name: KAFKA_GROUP_ID
+          value: ReglogGroup
+        - name: KAFKA_MAIN_TOPIC
+          value: session-topic
+        - name: MYSQL_DATABASE
+          value: userDB
+        - name: MYSQL_HOST
+          value: reglogdb
+        - name: MYSQL_PASSWORD
+          value: ourPass
+        - name: MYSQL_ROOT_PASSWORD
+          value: pass
+        - name: MYSQL_USER
+          value: gianmari
+        - name: http.cors.allow-methods
+          value: OPTIONS,HEAD,GET,POST,PUT,DELETE
+        - name: http.cors.allow-origin
+          value: '*'
+        - name: http.cors.enable
+          value: "true"
+        - name: SERVER_SERVLET_CONTEXTPATH
+          value: "/reglog"
+        image: docker.io/library/reglog:latest
+        imagePullPolicy: IfNotPresent
+        name: reglog
+        ports:
+        - containerPort: 8081
+      restartPolicy: Always
+

@@ -1,0 +1,46 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spring-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type"
+    #nginx.ingress.kubernetes.io/rewrite-target: "/"
+spec:
+  rules:
+    - host: hospital.loc
+      http:
+        paths:
+          - path: /reglog
+            pathType: Prefix
+            backend:
+              service:
+               name: reglog
+               port:
+                  number: 8081
+          - path: /reception
+            pathType: Prefix
+            backend:
+              service:
+                name: receptionservice
+                port:
+                  number: 8083
+          - path: /doctor
+            pathType: Prefix
+            backend:
+              service:
+                name: docservice
+                port:
+                  number: 8082
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+
+

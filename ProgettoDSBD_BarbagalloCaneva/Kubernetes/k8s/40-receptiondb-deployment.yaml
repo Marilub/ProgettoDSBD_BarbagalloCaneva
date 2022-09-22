@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: receptiondb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: receptiondb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: receptiondb
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: ReceptionDB
+        - name: MYSQL_PASSWORD
+          value: ourPass
+        - name: MYSQL_ROOT_PASSWORD
+          value: pass
+        - name: MYSQL_USER
+          value: gianmari
+        image: mysql:5.6
+        name: receptiondb
+        ports:
+          - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: receptiondb-volume
+      restartPolicy: Always
+      volumes:
+      - name: receptiondb-volume
+        hostPath:
+          path: /ReceptionDBVolume
+          type: DirectoryOrCreate
+

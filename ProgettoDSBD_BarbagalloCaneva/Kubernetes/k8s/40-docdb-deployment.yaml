@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docdb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: docdb
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: DoctorDB
+        - name: MYSQL_PASSWORD
+          value: ourPass
+        - name: MYSQL_ROOT_PASSWORD
+          value: pass
+        - name: MYSQL_USER
+          value: gianmari
+        image: mysql:5.6
+        name: docdb
+        ports:
+          - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: docdb-volume
+      restartPolicy: Always
+      volumes:
+      - name: docdb-volume
+        hostPath:
+          path: /DocDBVolume
+          type: DirectoryOrCreate
+

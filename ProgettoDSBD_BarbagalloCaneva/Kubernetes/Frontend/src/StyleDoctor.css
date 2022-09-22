@@ -1,0 +1,122 @@
+body {
+    margin: 0;
+    background-color: whitesmoke;
+}
+
+main {
+    display: flex;
+
+}
+
+#logout{
+    height: 25px;
+    margin:5px;
+}
+#form1{
+    margin-left:40%;
+
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0 5px 0;
+}
+
+.labelFormInsert{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 5px 0 5px 0;
+}
+
+input {
+    margin-left: 0.5em;
+}
+.gender{
+    display: flex;
+}
+#txt{
+    margin-bottom:10px;
+}
+
+#DoctorPatient{
+    text-align:center;
+
+    margin-left:30%;
+    width:30%;
+
+}
+
+.menu{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin-top:50px;
+}
+
+.contenitore{
+    display: flex;
+    justify-content: space-around;
+    background-color: whitesmoke;
+    font-family: Helvetica, sans-serif;
+    height: 250px;
+    margin-top:50px;
+
+}
+
+.Cartella{
+    display: flex;
+    flex-direction: column;
+    text-align:start;
+    justify-content: space-around;
+    margin-top:50px;
+
+}
+
+.hidden{
+    display:none;
+}
+
+.pazienti{
+    display: flex;
+    flex-direction: column;
+    margin-left:40%;
+    margin-top:30px;
+}
+
+.bPatient{
+    margin-bottom:5px;
+    margin-top:5px;
+}
+
+#nomePaziente{
+    font-weight: bold;
+    font-size: 40px;
+}
+#tipoInserimento{
+    font-size: 20px;
+}
+
+#cercaPazienti{
+    display:flex;
+    margin-left:40%;
+    width:300px;
+}
+.backB{
+    height:40px;
+    margin-top:10px;
+}
+#containerSelectP,#Insert{
+    margin-left:30%;
+}
+
+#errPostiLetto,#errRicovero{
+    margin: 20px;
+    margin-left:100px;
+    font-weight: bold;
+    font-size: 20px;
+    color:red;
+
+}

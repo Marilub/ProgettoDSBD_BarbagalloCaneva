@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: receptionservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: receptionservice
+  template:
+    metadata:
+      labels:
+        app: receptionservice
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8083"
+        prometheus.io/path: "actuator/prometheus"
+    spec:
+      containers:
+      - env:
+        - name: EUREKA_SERVER
+          value: eurekaserver
+        - name: KAFKA_ADDRESS
+          value: kafka:9092
+        - name: KAFKA_DOCTOR_TOPIC
+          value: d-topic
+        - name: KAFKA_GROUP_ID
+          value: receptionGroup
+        - name: KAFKA_MAIN_TOPIC
+          value: session-topic
+        - name: KAFKA_PAZIENTE_TOPIC
+          value: p-topic
+        - name: MYSQL_DATABASE
+          value: ReceptionDB
+        - name: MYSQL_HOST
+          value: receptiondb
+        - name: MYSQL_PASSWORD
+          value: ourPass
+        - name: MYSQL_ROOT_PASSWORD
+          value: pass
+        - name: MYSQL_USER
+          value: gianmari
+        - name: http.cors.allow-methods
+          value: OPTIONS,HEAD,GET,POST,PUT,DELETE
+        - name: http.cors.allow-origin
+          value: '*'
+        - name: http.cors.enable
+          value: "true"
+        image: docker.io/library/receptionservice:latest
+        imagePullPolicy: IfNotPresent
+        name: receptionservice
+        ports:
+        - containerPort: 8083
+      restartPolicy: Always

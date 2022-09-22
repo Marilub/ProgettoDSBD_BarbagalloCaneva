@@ -1,0 +1,42 @@
+form div{
+    margin: 0.3em;
+}
+main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+body{
+    margin: 0;
+    background-color: #fafafa;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+form div label{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+form div label input{
+    margin-left: 0.8em;
+}
+.erroreCampi ,.erroreCredenziali, #erroreNome, .errore{
+    color: red;
+    font-size: 20px;
+    font-weight: bold;
+}
+.hidden{
+    display: none;
+}
+.erroreChiocciola{
+    color: red;
+    font-size: 14px;
+    font-style: italic;
+}
+.errorePsw{
+    color: red;
+    font-size: 14px;
+}
+#nomeUtente.erroreUser{
+    border: 2px solid red;
+}

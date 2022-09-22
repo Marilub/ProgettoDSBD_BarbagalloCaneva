@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reglogdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reglogdb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: reglogdb
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: userDB
+        - name: MYSQL_PASSWORD
+          value: ourPass
+        - name: MYSQL_ROOT_PASSWORD
+          value: pass
+        - name: MYSQL_USER
+          value: gianmari
+        image: mysql:5.6
+        name: reglogdb
+        ports:
+          - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: reglogdb-db-volume
+      restartPolicy: Always
+      volumes:
+      - name: reglogdb-db-volume
+        hostPath:
+          path: /reglogDBVolume
+          type: DirectoryOrCreate
